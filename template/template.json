@@ -1,0 +1,59 @@
+{
+    "push": {
+      "name": "sanghan/pyspark"
+    },
+    "variables": {
+        "atlas_token": "rz6_vxq8Ytst_sQsr_7ExLnY2sBhDRqjgA9YdAcvTEwwASaudnijkjmKymjyszmrf5w"
+    },
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "name": "ubuntu-12.04.amd64.virtualbox",
+            "guest_os_type": "Ubuntu_64",
+            "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
+            "iso_checksum": "769474248a3897f4865817446f9a4a53",
+            "iso_checksum_type": "md5",
+            "ssh_username": "vagrant",
+            "ssh_password": "vagrant",
+            "ssh_wait_timeout": "120s",
+            "http_directory": "../http/ubuntu/",
+            "headless": false,
+            "boot_wait": "5s",
+            "boot_command": [
+                "<esc><esc><enter><wait>",
+                "/install/vmlinuz ",
+                "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/preseed.cfg ",
+                "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+                "hostname={{.Name}} ",
+                "fb=false debconf/frontend=noninteractive ",
+                "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+                "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+                "initrd=/install/initrd.gz -- <enter>"
+            ],
+            "shutdown_command": "echo 'vagrant' | sudo -S -E shutdown -P now",
+            "vboxmanage": [
+                ["modifyvm", "{{.Name}}", "--memory", "2048"],
+                ["modifyvm", "{{.Name}}", "--cpus", "1"]
+            ]
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "sleep 30",
+                "sudo apt-get -y update",
+                "sudo apt-get -y install openssh-server",
+                "reboot"
+            ]
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "atlas",
+            "token": "{{user `atlas_token`}}",
+            "artifact": "sanghan/pyspark",
+            "artifact_type": "vagrant"
+        }
+    ]
+}
